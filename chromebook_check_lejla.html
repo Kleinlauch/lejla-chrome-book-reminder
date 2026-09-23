@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1b45">
+<title>ChromeBook Check</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
+  color:#fff;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(65,180,255,.55),transparent 30%),
+    radial-gradient(circle at 90% 25%,rgba(156,80,255,.55),transparent 34%),
+    radial-gradient(circle at 50% 100%,rgba(0,210,190,.32),transparent 38%),
+    linear-gradient(145deg,#071332,#102a68 48%,#1c1049);
+  min-height:100svh;
+}
+body:before,body:after{
+  content:"";position:fixed;inset:-30%;pointer-events:none;filter:blur(50px);
+  background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.12),transparent 65%);
+  animation:float 12s ease-in-out infinite alternate;
+}
+body:after{animation-duration:16s;transform:rotate(80deg);opacity:.5}
+@keyframes float{to{transform:translate(8%,5%) rotate(8deg)}}
+
+.app{
+  min-height:100svh;
+  padding:max(34px,env(safe-area-inset-top)) 20px max(28px,env(safe-area-inset-bottom));
+  display:flex;align-items:center;justify-content:center;
+}
+.card{
+  width:min(100%,430px);
+  padding:30px 22px 24px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:34px;
+  background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.06));
+  box-shadow:0 30px 80px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.3);
+  backdrop-filter:blur(35px) saturate(150%);
+  -webkit-backdrop-filter:blur(35px) saturate(150%);
+  text-align:center;
+  animation:cardIn .7s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.icon{
+  width:76px;height:76px;margin:0 auto 18px;border-radius:24px;
+  display:grid;place-items:center;font-size:38px;
+  background:linear-gradient(145deg,rgba(255,255,255,.28),rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:inset 0 1px rgba(255,255,255,.35),0 15px 35px rgba(0,0,0,.18);
+}
+h1{font-size:32px;line-height:1.04;margin:0 0 12px;font-weight:800;letter-spacing:-1.3px}
+p{font-size:18px;line-height:1.4;margin:0;color:rgba(255,255,255,.82)}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+button{
+  border:0;color:#fff;font:inherit;font-weight:750;cursor:pointer;
+  min-height:62px;border-radius:21px;
+  transition:transform .18s,filter .18s,box-shadow .18s;
+}
+button:active{transform:scale(.96)}
+.no{background:linear-gradient(145deg,#ff466e,#d51f4b);box-shadow:0 10px 30px rgba(255,50,90,.28)}
+.yes{background:linear-gradient(145deg,#36e6b1,#0aaa8b);box-shadow:0 10px 30px rgba(0,220,165,.25)}
+.no:hover,.yes:hover{filter:brightness(1.08)}
+
+.overlay{
+  position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+  padding:22px;background:rgba(0,0,0,.28);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.overlay.show{opacity:1;pointer-events:auto}
+.popup{
+  width:min(100%,390px);padding:27px 22px 23px;border-radius:32px;text-align:center;
+  background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 35px 90px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.3);
+  backdrop-filter:blur(40px) saturate(160%);-webkit-backdrop-filter:blur(40px) saturate(160%);
+  transform:translateY(18px) scale(.94);transition:transform .4s cubic-bezier(.2,.9,.2,1);
+}
+.overlay.show .popup{transform:none}
+.popup-icon{font-size:42px;margin-bottom:10px}
+.popup h2{font-size:25px;line-height:1.1;margin:0 0 9px}
+.popup p{font-size:16px}
+.popup-actions{margin-top:20px}
+.single{width:100%}
+
+.slider{
+  margin-top:22px;height:70px;padding:6px;border-radius:35px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  position:relative;overflow:hidden;touch-action:none;user-select:none;
+}
+.slider:after{
+  content:"NACH RECHTS SCHIEBEN";position:absolute;inset:0;display:grid;place-items:center;
+  color:rgba(255,255,255,.6);font-size:13px;font-weight:800;letter-spacing:.8px;
+  pointer-events:none;
+}
+.knob{
+  position:absolute;z-index:2;left:6px;top:6px;width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;font-size:27px;font-weight:900;
+  background:linear-gradient(145deg,#fff,#b9ffe9);color:#079b7b;
+  box-shadow:0 7px 20px rgba(0,0,0,.25),0 0 24px rgba(60,255,200,.5);
+  cursor:grab;transition:transform .2s;
+}
+.knob:active{cursor:grabbing;transform:scale(1.05)}
+.success .popup{border-color:rgba(76,255,194,.45)}
+.spinner{
+  width:48px;height:48px;border-radius:50%;margin:0 auto 16px;
+  border:4px solid rgba(255,255,255,.2);border-top-color:#fff;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+@media(max-height:650px){.card{padding:22px 18px}.icon{width:60px;height:60px;font-size:30px}h1{font-size:27px}.buttons{margin-top:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="card">
+    <div class="icon">💻</div>
+    <h1>Hi Lejla 👋</h1>
+    <p>hast du dein ChromeBook<br> sicher eingepackt?</p>
+    <div class="buttons">
+      <button class="no" id="mainNo">Nein</button>
+      <button class="yes" id="mainYes">Ja</button>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="noOverlay">
+  <div class="popup">
+    <div class="popup-icon">😤</div>
+    <h2>Dann pack es bittteeee ein</h2>
+    <p>Das ChromeBook will schließlich auch mit. 😌</p>
+    <div class="popup-actions">
+      <button class="no single" id="noClose">Okay, mache ich</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="sureOverlay">
+  <div class="popup">
+    <div class="popup-icon">🤨</div>
+    <h2>SICHER EINGEPACKT?</h2>
+    <p>Ganz sicher? Dann schieb den Regler nach rechts. 👉</p>
+    <div class="slider" id="slider">
+      <div class="knob" id="knob">➜</div>
+    </div>
+    <div class="popup-actions">
+      <button class="no single" id="sureNo">Nein</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay success" id="successOverlay">
+  <div class="popup">
+    <div class="spinner"></div>
+    <h2>Alles klar! ✨</h2>
+    <p>Die Benachrichtigungen sollten in den nächsten Minuten stoppen!</p>
+  </div>
+</div>
+
+<iframe id="pushcutFrame" class="hidden" title="Pushcut"></iframe>
+
+<script>
+const PUSH_URL = "https://api.pushcut.io/loPBXSU7lmRjUzDvwnMUm/execute?shortcut=STOP-NOTIFY";
+
+const noOverlay = document.getElementById("noOverlay");
+const sureOverlay = document.getElementById("sureOverlay");
+const successOverlay = document.getElementById("successOverlay");
+
+document.getElementById("mainNo").onclick = () => noOverlay.classList.add("show");
+document.getElementById("noClose").onclick = () => noOverlay.classList.remove("show");
+
+document.getElementById("mainYes").onclick = () => sureOverlay.classList.add("show");
+
+document.getElementById("sureNo").onclick = () => {
+  sureOverlay.classList.remove("show");
+  noOverlay.classList.add("show");
+};
+
+const slider = document.getElementById("slider");
+const knob = document.getElementById("knob");
+let dragging = false, startX = 0, startLeft = 6, completed = false;
+
+function maxLeft() {
+  return slider.clientWidth - knob.clientWidth - 6;
+}
+function setKnob(x) {
+  const max = maxLeft();
+  const left = Math.max(6, Math.min(max, x));
+  knob.style.left = left + "px";
+  if (left >= max * .92) finish();
+}
+function finish() {
+  if (completed) return;
+  completed = true;
+  knob.style.left = maxLeft() + "px";
+  successOverlay.classList.add("show");
+  // Navigation in a hidden iframe avoids leaving the page.
+  document.getElementById("pushcutFrame").src = PUSH_URL;
+}
+knob.addEventListener("pointerdown", e => {
+  if (completed) return;
+  dragging = true;
+  startX = e.clientX;
+  startLeft = parseFloat(getComputedStyle(knob).left);
+  knob.setPointerCapture(e.pointerId);
+});
+knob.addEventListener("pointermove", e => {
+  if (!dragging || completed) return;
+  setKnob(startLeft + e.clientX - startX);
+});
+knob.addEventListener("pointerup", e => {
+  dragging = false;
+  if (!completed) {
+    if (parseFloat(getComputedStyle(knob).left) < maxLeft() * .92) {
+      knob.style.left = "6px";
+    }
+  }
+});
+knob.addEventListener("pointercancel", () => {
+  dragging = false;
+  if (!completed) knob.style.left = "6px";
+});
+</script>
+</body>
+</html>
