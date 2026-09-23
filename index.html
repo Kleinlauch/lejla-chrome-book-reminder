@@ -198,7 +198,11 @@ function finish() {
   knob.style.left = maxLeft() + "px";
   successOverlay.classList.add("show");
   // Navigation in a hidden iframe avoids leaving the page.
-  document.getElementById("pushcutFrame").src = PUSH_URL;
+  const frame = document.getElementById("pushcutFrame");
+  frame.onload = () => {
+    document.querySelector("#successOverlay .spinner").classList.add("hidden");
+  };
+  frame.src = PUSH_URL;
 }
 knob.addEventListener("pointerdown", e => {
   if (completed) return;
